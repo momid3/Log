@@ -6,7 +6,7 @@ import com.momid.parser.not
 
 val infoAccess: MultiExpression by lazy {
     className["infoName"] + insideOf('(', ')') {
-        splitBy(expression["infoParameter"], ",")
+        splitBy(complexExpression["infoParameter"], ",")["infoParameters"]
     }["infoParameters"]
 }
 
@@ -14,7 +14,7 @@ fun ExpressionResultsHandlerContext.handleInfoAccess(generation: Generation): Re
     with(this.expressionResult) {
         val name = this["infoName"]
         val parameters = this["infoParameters"].continuing?.asMulti()?.map {
-            val evaluation = continueWithOne(it, expression) { handleExpression(generation) }.okOrReport {
+            val evaluation = continueWithOne(it, complexExpression) { handleExpression(generation) }.okOrReport {
                 return it.to()
             }
             evaluation
@@ -34,4 +34,4 @@ fun ExpressionResultsHandlerContext.handleInfoAccess(generation: Generation): Re
     }
 }
 
-val unknownTypeEval = Eval("", UnknownType())
+val unknownTypeEval = Eval("unknown", UnknownType())

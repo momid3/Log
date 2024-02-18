@@ -7,19 +7,19 @@ import com.momid.parser.not
 
 val info =
     className["infoName"] + insideOf('(', ')') {
-        splitBy(expression["infoParameter"], ",")
-    }["infoParameters"] + spaces + "=" + spaces + expression["infoValue"] + spaces + !";"
+        splitBy(complexExpression["infoParameter"], ",")["infoParameters"]
+    }["infoParameters"] + spaces + "=" + spaces + complexExpression["infoValue"] + spaces + !";"
 
 fun ExpressionResultsHandlerContext.handleInfo(generation: Generation): Result<Info> {
     with(this.expressionResult) {
         val name = this["infoName"]
         val parameters = this["infoParameters"].continuing?.asMulti()?.map {
-            val evaluation = continueWithOne(it, expression) { handleExpression(generation) }.okOrReport {
+            val evaluation = continueWithOne(it, complexExpression) { handleExpression(generation) }.okOrReport {
                 return it.to()
             }
             evaluation
         }.orEmpty()
-        val value = continueWithOne(this["infoValue"], expression) { handleExpression(generation) }.okOrReport {
+        val value = continueWithOne(this["infoValue"], complexExpression) { handleExpression(generation) }.okOrReport {
             return it.to()
         }
 

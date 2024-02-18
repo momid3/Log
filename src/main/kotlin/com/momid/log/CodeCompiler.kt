@@ -8,17 +8,21 @@ import javax.script.ScriptEngineManager
 fun compile(text: String) {
     val generation = Generation()
     val finder = ExpressionFinder()
-    finder.registerExpressions(listOf(expression))
+    finder.registerExpressions(listOf(info, print))
     finder.start(text.toList()).forEach {
         handleExpressionResult(finder, it, text.toList()) {
             with(this.expressionResult) {
-                this.isOf(expression) {
-                    val eval = continueStraight(it) { handleExpression(generation) }.okOrReport {
+                this.isOf(info) {
+                    val eval = continueStraight(it) { handleInfo(generation) }.okOrReport {
                         return@handleExpressionResult it.to()
-                    }.also {
-                        println(it.output)
                     }
-                    println(execute(eval.output))
+//                    println(execute(eval.output))
+                }
+
+                this.isOf(print) {
+                    continueStraight(it) { handlePrint(generation) }.okOrReport {
+                        return@handleExpressionResult it.to()
+                    }
                 }
                 return@handleExpressionResult Ok(true)
             }
@@ -27,7 +31,11 @@ fun compile(text: String) {
 }
 
 fun main() {
-    compile("3 + 7 + 333")
+    compile(
+        """
+           areFriends(3) = 3 + 7 + 333;print(areFriends(3));
+        """.trimIndent()
+    )
 }
 
 fun <T> finder(text: String, registeredExpression: Expression, handle: ExpressionResultsHandlerContext.() -> Result<T>) {

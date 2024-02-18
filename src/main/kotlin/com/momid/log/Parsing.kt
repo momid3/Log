@@ -6,12 +6,12 @@ import com.momid.parser.expression.*
 import com.momid.parser.not
 
 val atom =
-    className["atom"]
+    className["atom"] + not(!"(")
 
 val operator =
     anyOf(!"+", !"-", !"*", !"/")["operator"]
 
-val expression by lazy {
+val complexExpression by lazy {
     some(
         spaces + anyOf(
             atom["atom"],
@@ -26,7 +26,7 @@ val expression by lazy {
 fun ExpressionResultsHandlerContext.handleExpression(generation: Generation): Result<Eval> {
     with(this.expressionResult) {
         var output = ""
-        var type: Type
+        var type: Type? = null
         this.forEach {
             with(it["atomicExp"]) {
                 this.content.isOf(atom) {
@@ -59,11 +59,16 @@ fun ExpressionResultsHandlerContext.handleExpression(generation: Generation): Re
             }
         }
 
-        return Ok(Eval(output, BooleanType(BooleanO(true))))
+        if (type == null) {
+            println("could not determine this expression type")
+            return Error("could not determine this expression type", this.range)
+        } else {
+            return Ok(Eval(output, type!!))
+        }
     }
 }
 
 fun main() {
     val generation = Generation()
-    finder("someAtom", expression) { handleExpression(generation) }
+    finder("someAtom", complexExpression) { handleExpression(generation) }
 }
