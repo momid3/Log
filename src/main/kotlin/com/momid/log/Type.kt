@@ -1,5 +1,6 @@
 package com.momid.log
 
+import com.momid.log.output.InfoAccess
 import com.momid.log.output.Unknown
 
 open class Type()
@@ -16,12 +17,24 @@ class UnknownType(): Type()
 
 class RuleUnknownType(val unknown: Unknown): Type()
 
+class OperatorType(val operator: Operator): Type()
+
+class InfoAccessType(val infoAccess: InfoAccess): Type()
+
 class Text(val text: String)
 
 class Atom(val name: String)
 
 class BooleanO(val value: Boolean)
 
+enum class Operator {
+    Operator, Plus, Minus, Multiply, Divide
+}
+
 class Eval(val output: String, val type: Type)
 
-class Evaluation(val output: String, val type: Type)
+class Evaluation(val output: String, val type: Type, val items: ArrayList<Evaluation> = arrayListOf()): List<Evaluation> by items
+
+operator fun Evaluation.plusAssign(item: Evaluation) {
+    this.items.add(item)
+}

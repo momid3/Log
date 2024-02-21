@@ -1,9 +1,7 @@
 package com.momid.log
 
 import com.momid.compiler.*
-import com.momid.compiler.terminal.blue
 import com.momid.compiler.terminal.yellow
-import com.momid.log.infoAccess
 import com.momid.log.output.RuleDefinitionContext
 import com.momid.log.output.Unknown
 import com.momid.parser.expression.*
@@ -114,34 +112,41 @@ fun ExpressionResultsHandlerContext.handleExpressionEvaluation(generation: Gener
     with(this.expressionResult) {
         var output = ""
         var type: Type? = null
+        val evaluation = Evaluation(this.tokens, UnknownType())
         this.forEach {
             with(it["atomicExp"].content) {
                 this.isOf(atom) {
                     println("atom " + it.tokens)
-                    val atom = it.tokens
-                    return Ok(Evaluation(atom, AtomType(Atom(atom))))
+                    val atomTokens = it.tokens
+                    val atom = Atom(atomTokens)
+                    evaluation += Evaluation(atomTokens, AtomType(atom))
+                    return Ok(evaluation)
                 }
 
                 this.isOf(operator) {
                     println("operator " + it.tokens)
-                    val operator = it.tokens
-                    output += operator + " "
+                    val operatorTokens = it.tokens
+                    val operator = OperatorType(Operator.Operator)
+                    evaluation += Evaluation(operatorTokens, operator)
+                    output += operatorTokens + " "
                 }
 
                 this.isOf(number) {
                     println("number " + it.tokens)
-                    val number = it.tokens
-                    output += number + " "
-                    type = NumberType(number.toInt())
+                    val numberTokens = it.tokens
+                    output += numberTokens + " "
+                    type = NumberType(numberTokens.toInt())
+                    evaluation += Evaluation(numberTokens, type!!)
                 }
 
                 this.isOf(infoAccess) {
                     println("info access " + it.tokens)
-                    val eval = continueStraight(it) { handleInfoAccess(generation) }.okOrReport {
+                    val eval = continueStraight(it) { handleInfoAccessEvaluation(generation) }.okOrReport {
                         return it.to()
                     }
-                    output += eval.output + " "
-                    type = eval.type
+                    output += it.tokens + " "
+                    type = InfoAccessType(eval)
+                    evaluation += Evaluation(it.tokens, type!!)
                 }
 
                 this.isOf(booleanLiteral) {
@@ -150,12 +155,14 @@ fun ExpressionResultsHandlerContext.handleExpressionEvaluation(generation: Gener
                         val trueValue = it.tokens
                         output += trueValue + " "
                         type = BooleanType(BooleanO(true))
+                        evaluation += Evaluation(trueValue, type!!)
                     }
 
                     it.content.isOf(falseValue) {
                         val trueValue = it.tokens
                         output += trueValue + " "
                         type = BooleanType(BooleanO(false))
+                        evaluation += Evaluation(trueValue, type!!)
                     }
                 }
 
@@ -167,6 +174,8 @@ fun ExpressionResultsHandlerContext.handleExpressionEvaluation(generation: Gener
                         type = RuleUnknownType(unknown)
                     }
 
+                    evaluation += Evaluation(unknownTokens, RuleUnknownType(unknown))
+
                     if (generation.currentScope.context is RuleDefinitionContext) {
                         val ruleDefinitionContext = (generation.currentScope.context as RuleDefinitionContext)
                         if (!ruleDefinitionContext.rule.unknowns.contains(unknown)) {
@@ -174,6 +183,7 @@ fun ExpressionResultsHandlerContext.handleExpressionEvaluation(generation: Gener
                         } else {
                             println("unknown " + yellow(unknownTokens))
                         }
+
                         (generation.currentScope.context as RuleDefinitionContext).rule.unknowns.add(unknown)
                     } else {
                         return Error("unknown should only be inside a rule declaration: " + it.tokens, it.range)
