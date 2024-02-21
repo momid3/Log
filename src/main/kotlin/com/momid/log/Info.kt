@@ -2,6 +2,7 @@ package com.momid.log
 
 import com.momid.compiler.*
 import com.momid.log.output.Info
+import com.momid.log.output.sameInfo
 import com.momid.parser.expression.*
 import com.momid.parser.not
 
@@ -25,7 +26,13 @@ fun ExpressionResultsHandlerContext.handleInfo(generation: Generation): Result<I
 
         val info = Info(name.tokens, parameters, value)
         println("info declaration: " + info.text)
-        generation.infos.add(info)
+        generation.infos.addOrReplace(info).also {
+            if (it) {
+                println("info added")
+            } else {
+                println("info updated")
+            }
+        }
         return Ok(info)
     }
 }
@@ -36,3 +43,14 @@ val Info.text: String
             it.output
         } + ")" + " = " + this.value.output
     }
+
+fun ArrayList<Info>.addOrReplace(info: Info): Boolean {
+    this.forEachIndexed { index, thisInfo ->
+        if (sameInfo(thisInfo, info)) {
+            this[index] = info
+            return false
+        }
+    }
+    this.add(info)
+    return true
+}

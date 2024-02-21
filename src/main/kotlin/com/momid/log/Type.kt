@@ -33,7 +33,19 @@ enum class Operator {
 
 class Eval(val output: String, val type: Type)
 
-class Evaluation(val output: String, val type: Type, val items: ArrayList<Evaluation> = arrayListOf()): List<Evaluation> by items
+class Evaluation(val output: String, val type: Type, val items: ArrayList<Evaluation> = arrayListOf()) :
+    List<Evaluation> by items {
+    override fun equals(other: Any?): Boolean {
+        return other is Evaluation && other.output == this.output
+    }
+
+    override fun hashCode(): Int {
+        var result = output.hashCode()
+        result = 31 * result + type.hashCode()
+        result = 31 * result + items.hashCode()
+        return result
+    }
+}
 
 operator fun Evaluation.plusAssign(item: Evaluation) {
     this.items.add(item)

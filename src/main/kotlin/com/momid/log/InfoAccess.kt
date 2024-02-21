@@ -23,7 +23,7 @@ fun ExpressionResultsHandlerContext.handleInfoAccess(generation: Generation): Re
 
         val info = generation.infos.find {
             it.name == name.tokens && it.parameters.forEveryIndexed { index, parameter ->
-                parameters[index] == parameter
+                parameters[index].output == parameter.output
             }
         }
 
