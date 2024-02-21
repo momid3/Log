@@ -1,5 +1,7 @@
 package com.momid.log
 
+import com.momid.log.output.Unknown
+
 open class Type()
 
 class AtomType(val atom: Atom): Type()
@@ -11,6 +13,8 @@ class BooleanType(val boolean: BooleanO): Type()
 class NumberType(val number: Int): Type()
 
 class UnknownType(): Type()
+
+class RuleUnknownType(val unknown: Unknown): Type()
 
 class Text(val text: String)
 

@@ -8,24 +8,10 @@ import javax.script.ScriptEngineManager
 fun compile(text: String) {
     val generation = Generation()
     val finder = ExpressionFinder()
-    finder.registerExpressions(listOf(info, print))
+    finder.registerExpressions(listOf(statements))
     finder.start(text.toList()).forEach {
         handleExpressionResult(finder, it, text.toList()) {
-            with(this.expressionResult) {
-                this.isOf(info) {
-                    val eval = continueStraight(it) { handleInfo(generation) }.okOrReport {
-                        return@handleExpressionResult it.to()
-                    }
-//                    println(execute(eval.output))
-                }
-
-                this.isOf(print) {
-                    continueStraight(it) { handlePrint(generation) }.okOrReport {
-                        return@handleExpressionResult it.to()
-                    }
-                }
-                return@handleExpressionResult Ok(true)
-            }
+            handleStatements(generation)
         }
     }
 }
@@ -33,7 +19,9 @@ fun compile(text: String) {
 fun main() {
     compile(
         """
-           areFriends(3) = 3 + 7 + 333;print(areFriends(3));
+            areFriends(A, C) = true -> areFriends(C, A) = true;
+            areFriends(3) = 3 + 7 + 333;
+            print(areFriends(3));
         """.trimIndent()
     )
 }

@@ -6,7 +6,7 @@ import com.momid.parser.not
 
 val infoAccess: MultiExpression by lazy {
     className["infoName"] + insideOf('(', ')') {
-        splitBy(complexExpression["infoParameter"], ",")["infoParameters"]
+        splitByNW(complexExpression["infoParameter"], ",")["infoParameters"]
     }["infoParameters"]
 }
 

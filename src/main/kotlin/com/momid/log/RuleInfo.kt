@@ -2,35 +2,35 @@ package com.momid.log
 
 import com.momid.compiler.*
 import com.momid.log.output.Info
+import com.momid.log.output.RuleInfo
 import com.momid.parser.expression.*
 import com.momid.parser.not
 
-val info =
+val ruleInfo =
     className["infoName"] + insideOf('(', ')') {
         splitByNW(complexExpression["infoParameter"], ",")["infoParameters"]
-    }["infoParameters"] + spaces + "=" + spaces + complexExpression["infoValue"] + spaces + !";"
+    }["infoParameters"] + spaces + "=" + spaces + complexExpression["infoValue"]
 
-fun ExpressionResultsHandlerContext.handleInfo(generation: Generation): Result<Info> {
+fun ExpressionResultsHandlerContext.handleRuleInfo(generation: Generation): Result<RuleInfo> {
     with(this.expressionResult) {
         val name = this["infoName"]
         val parameters = this["infoParameters"].continuing?.asMulti()?.map {
-            val evaluation = continueWithOne(it, complexExpression) { handleExpression(generation) }.okOrReport {
+            val evaluation = continueWithOne(it, complexExpression) { handleExpressionEvaluation(generation) }.okOrReport {
                 return it.to()
             }
             evaluation
         }.orEmpty()
-        val value = continueWithOne(this["infoValue"], complexExpression) { handleExpression(generation) }.okOrReport {
+        val value = continueWithOne(this["infoValue"], complexExpression) { handleExpressionEvaluation(generation) }.okOrReport {
             return it.to()
         }
 
-        val info = Info(name.tokens, parameters, value)
-        println("info declaration: " + info.text)
-        generation.infos.add(info)
-        return Ok(info)
+        val ruleInfo = RuleInfo(name.tokens, parameters, value)
+        println("ruleInfo: " + ruleInfo.text)
+        return Ok(ruleInfo)
     }
 }
 
-val Info.text: String
+val RuleInfo.text: String
     get() {
         return this.name + "(" + this.parameters.joinToString(", ") {
             it.output
