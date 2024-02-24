@@ -1,4 +1,6 @@
 package com.momid.log
+import com.momid.compiler.okOrReport
+import com.momid.compiler.standard_library.continueGiven
 import com.momid.compiler.terminal.blue
 import com.momid.log.output.Info
 import com.momid.log.output.Rule
@@ -19,7 +21,7 @@ fun ExpressionResultsHandlerContext.handleForwardFunction(generation: Generation
     }
 }
 
-fun forward(generation: Generation, substitutions: HashMap<Unknown, Eval>, ruleIndexF: Range? = null, ruleInfoIndexF: Range? = null, infoIndexF: Range? = null): Boolean {
+fun ExpressionResultsHandlerContext.forward(generation: Generation, substitutions: HashMap<Unknown, Eval>, ruleIndexF: Range? = null, ruleInfoIndexF: Range? = null, infoIndexF: Range? = null): Result<Boolean> {
     val infos = generation.infos
     generation.rules.each(ruleIndexF) rule@ { ruleIndex, rule ->
         println("has some rules")
@@ -37,13 +39,19 @@ fun forward(generation: Generation, substitutions: HashMap<Unknown, Eval>, ruleI
                 println(unknown.name to substitution.output)
             }
             var infoText = it.text
+
             substitutions.forEach { (unknown, substitution) ->
                 infoText = infoText.replace(unknown.name, substitution.output)
             }
-            blue(infoText)
+
+            val evaledRuleInfo = continueGiven(infoText + ";", info) { handleInfo(generation, false) }.okOrReport {
+                println(it.error)
+                return it.to()
+            }
+            blue(evaledRuleInfo.text)
         }.joinToString("\n"))
     }
-    return true
+    return Ok(true)
 }
 
 fun matches(info: Info, ruleInfo: RuleInfo, substitutions: HashMap<Unknown, Eval>): Boolean {

@@ -33,7 +33,7 @@ fun main() {
     compile(
         """
             areFriends(A, C) = true -> areFriends(C, A) = true;
-            areFriends(AU, BU) = true, areFriends(BU, CU) = true -> areFriends(AU, CU) = true;
+            areFriends(AU, BU) = true, areFriends(BU, CU) = true -> areFriends(AU, CU) = AU + CU;
             areFriends(3) = 3 + 7 + 333;
             areFriends(3, 7) = true;
             areFriends(7, 37) = true;

@@ -11,7 +11,7 @@ val info =
         splitByNW(complexExpression["infoParameter"], ",")["infoParameters"]
     }["infoParameters"] + spaces + "=" + spaces + complexExpression["infoValue"] + spaces + !";"
 
-fun ExpressionResultsHandlerContext.handleInfo(generation: Generation): Result<Info> {
+fun ExpressionResultsHandlerContext.handleInfo(generation: Generation, includeInInfos: Boolean = true): Result<Info> {
     with(this.expressionResult) {
         val name = this["infoName"]
         val parameters = this["infoParameters"].continuing?.asMulti()?.map {
@@ -26,11 +26,13 @@ fun ExpressionResultsHandlerContext.handleInfo(generation: Generation): Result<I
 
         val info = Info(name.tokens, parameters, value)
         println("info declaration: " + info.text)
-        generation.infos.addOrReplace(info).also {
-            if (it) {
-                println("info added")
-            } else {
-                println("info updated")
+        if (includeInInfos) {
+            generation.infos.addOrReplace(info).also {
+                if (it) {
+                    println("info added")
+                } else {
+                    println("info updated")
+                }
             }
         }
         return Ok(info)
