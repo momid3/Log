@@ -3,6 +3,7 @@ package com.momid.log
 import com.momid.log.output.Info
 import com.momid.log.output.Rule
 import com.momid.log.output.Scope
+import com.momid.parser.expression.Error
 
 class Generation() {
     private val rootScope = Scope()
@@ -10,6 +11,7 @@ class Generation() {
     val infos = ArrayList<Info>()
     val rules = ArrayList<Rule>()
     var currentScope = rootScope
+    val errors = ArrayList<Error<*>>()
 
     fun createScope(): Scope {
         val scope = Scope()

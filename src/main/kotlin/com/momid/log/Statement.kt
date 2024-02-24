@@ -4,7 +4,7 @@ import com.momid.compiler.okOrReport
 import com.momid.parser.expression.*
 
 val statements =
-    some(spaces + anyOf(info, print, rule)["statement"] + spaces)
+    some(spaces + anyOf(info, print, rule, forwardInfer)["statement"] + spaces)
 
 fun ExpressionResultsHandlerContext.handleStatements(generation: Generation): Result<Boolean> {
     with(this.expressionResult) {
@@ -25,6 +25,12 @@ fun ExpressionResultsHandlerContext.handleStatements(generation: Generation): Re
 
                 this.isOf(rule) {
                     continueStraight(it) { handleRuleDeclaration(generation) }.okOrReport {
+                        return it.to()
+                    }
+                }
+
+                this.isOf(forwardInfer) {
+                    continueStraight(it) { handleForwardFunction(generation) }.okOrReport {
                         return it.to()
                     }
                 }

@@ -180,17 +180,18 @@ fun ExpressionResultsHandlerContext.handleExpressionEvaluation(generation: Gener
                         val ruleDefinitionContext = (generation.currentScope.context as RuleDefinitionContext)
                         if (!ruleDefinitionContext.rule.unknowns.contains(unknown)) {
                             println("unknown " + yellow("[new] ") + yellow(unknownTokens))
+                            (generation.currentScope.context as RuleDefinitionContext).rule.unknowns.add(unknown)
                         } else {
                             println("unknown " + yellow(unknownTokens))
                         }
-
-                        (generation.currentScope.context as RuleDefinitionContext).rule.unknowns.add(unknown)
                     } else {
                         return Error("unknown should only be inside a rule declaration: " + it.tokens, it.range)
                     }
                 }
             }
         }
+
+        evaluation.type = type!!
 
         if (type == null) {
             println("could not determine this expression type")
@@ -199,7 +200,7 @@ fun ExpressionResultsHandlerContext.handleExpressionEvaluation(generation: Gener
             if (type is NumberType) {
                 output = execute(output).toString()
             }
-            return Ok(Evaluation(this.tokens, type!!))
+            return Ok(evaluation)
         }
     }
 }

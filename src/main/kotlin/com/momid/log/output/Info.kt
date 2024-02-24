@@ -11,7 +11,7 @@ class InfoParameter()
 class InfoAccess(val name: String, val parameters: List<Evaluation>)
 
 fun sameInfo(info: Info, otherInfo: Info): Boolean {
-    return info.name == otherInfo.name && info.parameters.forEveryIndexed { index, parameter ->
-        info.parameters[index] == parameter
+    return info.name == otherInfo.name && info.parameters.size == otherInfo.parameters.size && info.parameters.forEveryIndexed { index, parameter ->
+        otherInfo.parameters[index] == parameter
     }
 }
